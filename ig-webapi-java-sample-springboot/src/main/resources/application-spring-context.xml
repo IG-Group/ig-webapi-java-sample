@@ -1,0 +1,43 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+    <context:component-scan base-package="com.iggroup.webapi.samples"/>
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:environment.properties</value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="false"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:environment.properties</value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="false"/>
+    </bean>
+
+    <bean name="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
+
+   <bean name="restTemplate" class="org.springframework.web.client.RestTemplate">
+      <property name="requestFactory" ref="requestFactory" />
+   </bean>
+
+   <bean name="requestFactory" class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory">
+      <property name="connectTimeout" value="10000" />
+      <property name="readTimeout" value="10000" />
+   </bean>
+
+   <bean name="httpClient" class="org.apache.http.client.HttpClient" factory-bean="requestFactory" factory-method="getHttpClient"/>
+
+    <bean name="application" class="com.iggroup.webapi.samples.Application"/>
+
+</beans>
