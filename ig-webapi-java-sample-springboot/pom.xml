@@ -17,7 +17,6 @@
 
    <properties>
       <spring-boot.version>1.4.0.RELEASE</spring-boot.version>
-      <slf4j.version>1.7.21</slf4j.version>
    </properties>
 
    <dependencyManagement>
@@ -52,25 +51,21 @@
       <dependency>
          <groupId>org.apache.httpcomponents</groupId>
          <artifactId>httpclient</artifactId>
-         <version>4.3.3</version>
       </dependency>
 
       <dependency>
          <groupId>org.slf4j</groupId>
          <artifactId>slf4j-api</artifactId>
-         <version>${slf4j.version}</version>
       </dependency>
 
       <dependency>
          <groupId>org.slf4j</groupId>
          <artifactId>jcl-over-slf4j</artifactId>
-         <version>${slf4j.version}</version>
       </dependency>
 
       <dependency>
          <groupId>org.slf4j</groupId>
          <artifactId>log4j-over-slf4j</artifactId>
-         <version>${slf4j.version}</version>
       </dependency>
 
       <dependency>
