@@ -24,7 +24,6 @@
       <spring.version>4.3.2.RELEASE</spring.version>
       <commons-io.version>1.3.2</commons-io.version>
       <jackson.version>2.8.1</jackson.version>
-      <joda-time.version>2.9.4</joda-time.version>
       <slf4j.version>1.7.21</slf4j.version>
       <httpclient.version>4.3.3</httpclient.version>
    </properties>
@@ -94,12 +93,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
-         </dependency>
-
-         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${joda-time.version}</version>
          </dependency>
 
          <dependency>
