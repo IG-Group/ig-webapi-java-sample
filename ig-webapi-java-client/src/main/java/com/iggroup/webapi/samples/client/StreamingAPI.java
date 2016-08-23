@@ -219,7 +219,7 @@ public class StreamingAPI {
 
 	public HandyTableListenerAdapter subscribeForChartCandles(String epic,
 			String scale, HandyTableListenerAdapter adapter) throws Exception {
-		String subscriptionKey = CHART_TICK_PATTERN.replace("{epic}", epic);
+		String subscriptionKey = CHART_CANDLE_PATTERN.replace("{epic}", epic);
 		subscriptionKey.replace("{scale}", scale);
 
 		ExtendedTableInfo extendedTableInfo = new ExtendedTableInfo(

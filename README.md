@@ -14,5 +14,5 @@ This repository contains a Java sample application to access the IG REST and Str
 4) Run the executable jar file:
 ```
     cd ig-webapi-java-sample-springboot
-    java -jar target\ig-webapi-java-sample-springboot-<maven version>.jar <username> <password> <api key>
+    java -jar target\ig-webapi-java-sample-springboot-<project version>.jar <username> <password> <api key>
 ```
