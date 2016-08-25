@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/IG-Group/ig-webapi-java-sample.svg?branch=master)](https://travis-ci.org/IG-Group/ig-webapi-java-sample)
 
 ### Overview
-This repository contains a Java sample application to access the IG REST and Streaming APIs.
+This repository contains two simple Java console sample applications which access the IG REST and Streaming APIs.
 
 ### Getting started
 1) Set the destination IG environment in **environment.properties**.
@@ -11,8 +11,14 @@ This repository contains a Java sample application to access the IG REST and Str
 
 3) Run **mvn clean install** to build the project.
 
-4) Run the executable jar file:
+4.a) Run basic console app:
 ```
-    cd ig-webapi-java-sample-springboot
-    java -jar target\ig-webapi-java-sample-springboot-<project version>.jar <username> <password> <api key>
+    cd ig-webapi-java-sample-console
+    java -jar target\ig-webapi-java-sample-console-<project version>.jar <username> <password> <api key>
+```
+
+4.b) Run UI based console app
+```
+    cd ig-webapi-java-sample-console-ui
+    java -jar target\ig-webapi-java-sample-console-ui-<project version>.jar <username> <password> <api key> [<optional epic>]
 ```

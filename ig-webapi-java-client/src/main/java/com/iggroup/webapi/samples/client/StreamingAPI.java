@@ -5,15 +5,10 @@ import com.iggroup.webapi.samples.client.rest.ConversationContext;
 import com.iggroup.webapi.samples.client.streaming.ConnectionListenerAdapter;
 import com.iggroup.webapi.samples.client.streaming.HandyTableListenerAdapter;
 import com.lightstreamer.ls_client.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class StreamingAPI {
-
-	private static final Logger LOG = LoggerFactory
-			.getLogger(StreamingAPI.class);
 
 	private static final String TRADE_PATTERN = "TRADE:{accountId}";
 	private static final String ACCOUNT_BALANCE_INFO_PATTERN = "ACCOUNT:{accountId}";
@@ -78,10 +73,7 @@ public class StreamingAPI {
 
 		final ConnectionListenerAdapter adapter = new ConnectionListenerAdapter();
 
-		LOG.info("Connecting to lightstreamer server {} password {}",
-				lightstreamerEndpoint, connectionInfo.password);
 		lsClient.openConnection(connectionInfo, adapter);
-		LOG.info("Lightstreamer connected");
 
 		return adapter;
 	}
@@ -145,6 +137,16 @@ public class StreamingAPI {
 
 		final SubscribedTableKey subscribedTableKey = lsClient.subscribeTable(
 				extendedTableInfo, adapter, false);
+		adapter.setSubscribedTableKey(subscribedTableKey);
+		return adapter;
+	}
+
+	public HandyTableListenerAdapter subscribeForMarket(String epic, HandyTableListenerAdapter adapter, String... fields) throws Exception {
+		String subscriptionKey = MARKET_L1_PATTERN.replace("{epic}", epic);
+
+		ExtendedTableInfo extendedTableInfo = new ExtendedTableInfo(new String[] { subscriptionKey }, "MERGE", fields, true);
+
+		final SubscribedTableKey subscribedTableKey = lsClient.subscribeTable(extendedTableInfo, adapter, false);
 		adapter.setSubscribedTableKey(subscribedTableKey);
 		return adapter;
 	}

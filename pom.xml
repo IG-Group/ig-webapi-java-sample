@@ -30,7 +30,8 @@
 
    <modules>
       <module>ig-webapi-java-client</module>
-      <module>ig-webapi-java-sample-springboot</module>
+      <module>ig-webapi-java-sample-console</module>
+      <module>ig-webapi-java-sample-console-ui</module>
    </modules>
 
    <dependencyManagement>
