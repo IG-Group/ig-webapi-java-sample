@@ -17,8 +17,9 @@ This repository contains two simple Java console sample applications which acces
     java -jar target\ig-webapi-java-sample-console-<project version>.jar <username> <password> <api key>
 ```
 
-4.b) Run UI based console app
+4.b) Run UI based console app (increase window size to prevent scrolling)
 ```
     cd ig-webapi-java-sample-console-ui
     java -jar target\ig-webapi-java-sample-console-ui-<project version>.jar <username> <password> <api key> [<optional epic>]
 ```
+
