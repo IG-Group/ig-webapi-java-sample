@@ -1,0 +1,22 @@
+<configuration debug="false" scan="true" scanPeriod="5 seconds">
+
+   <!-- appenders -->
+   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder>
+         <pattern>%msg%n</pattern>
+      </encoder>
+   </appender>
+
+
+   <!-- third party code loggers -->
+   <logger name="httpclient.wire" level="warn"/>
+   <logger name="org.apache.commons" level="warn"/>
+   <logger name="org.apache.http" level="warn"/>
+   <logger name="org.springframework" level="warn"/>
+
+
+   <root level="info">
+      <appender-ref ref="STDOUT"/>
+   </root>
+
+</configuration>

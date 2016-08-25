@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+
+   <parent>
+      <groupId>com.iggroup.webapi.samples</groupId>
+      <artifactId>ig-webapi-java</artifactId>
+      <version>2.2.0-SNAPSHOT</version>
+   </parent>
+
+   <name>IG Web API Java Spring Boot Sample</name>
+   <description>Spring Boot sample application for accessing the IG REST and Streaming APIs</description>
+
+   <artifactId>ig-webapi-java-sample-console-ui</artifactId>
+
+   <properties>
+      <spring-boot.version>1.4.0.RELEASE</spring-boot.version>
+   </properties>
+
+   <dependencyManagement>
+      <dependencies>
+
+         <dependency>
+            <!-- Import dependency management from Spring Boot -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>${spring-boot.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+
+      </dependencies>
+   </dependencyManagement>
+
+   <dependencies>
+
+      <dependency>
+         <groupId>${project.parent.groupId}</groupId>
+         <artifactId>ig-webapi-java-client</artifactId>
+         <version>${project.parent.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter</artifactId>
+         <version>${spring-boot.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.apache.httpcomponents</groupId>
+         <artifactId>httpclient</artifactId>
+      </dependency>
+
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-api</artifactId>
+      </dependency>
+
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>jcl-over-slf4j</artifactId>
+      </dependency>
+
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>log4j-over-slf4j</artifactId>
+      </dependency>
+
+      <dependency>
+         <groupId>ch.qos.logback</groupId>
+         <artifactId>logback-classic</artifactId>
+         <version>1.1.7</version>
+      </dependency>
+
+       <dependency>
+           <groupId>org.fusesource.jansi</groupId>
+           <artifactId>jansi</artifactId>
+           <version>1.13</version>
+       </dependency>
+
+   </dependencies>
+
+   <build>
+      <pluginManagement>
+         <plugins>
+            <plugin>
+               <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
+               <artifactId>svn-revision-number-maven-plugin</artifactId>
+               <version>1.13</version>
+               <dependencies>
+                  <dependency>
+                     <groupId>org.tmatesoft.svnkit</groupId>
+                     <artifactId>svnkit</artifactId>
+                     <version>1.8.5</version>
+                  </dependency>
+               </dependencies>
+            </plugin>
+         </plugins>
+      </pluginManagement>
+
+      <plugins>
+         <!-- Create a spring boot executable app -->
+         <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>${spring-boot.version}</version>
+         </plugin>
+
+         <!-- Create samples app sources -->
+         <plugin>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>attach-sources</id>
+                  <goals>
+                     <goal>jar</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+
+      </plugins>
+
+   </build>
+
+</project>

@@ -13,7 +13,7 @@
    <name>IG Web API Java Spring Boot Sample</name>
    <description>Spring Boot sample application for accessing the IG REST and Streaming APIs</description>
 
-   <artifactId>ig-webapi-java-sample-springboot</artifactId>
+   <artifactId>ig-webapi-java-sample-console</artifactId>
 
    <properties>
       <spring-boot.version>1.4.0.RELEASE</spring-boot.version>
