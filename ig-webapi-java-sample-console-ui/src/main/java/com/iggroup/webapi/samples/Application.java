@@ -32,6 +32,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -197,7 +198,11 @@ public class Application implements CommandLineRunner {
          createPositionRequest.setForceOpen(true);
 
          logStatusMessage(String.format("Creating long position epic=%s, expiry=%s size=%s orderType=%s level=%s currency=%s", tradeableEpic, createPositionRequest.getExpiry(), createPositionRequest.getSize(), createPositionRequest.getOrderType(), createPositionRequest.getLevel(), createPositionRequest.getCurrencyCode()));
-         restApi.createOTCPositionV1(authenticationContext.getConversationContext(), createPositionRequest);
+         try {
+            restApi.createOTCPositionV1(authenticationContext.getConversationContext(), createPositionRequest);
+         } catch (HttpClientErrorException e) {
+            logStatusMessage(String.format("Failed to create position: status=%s message=%s", e.getStatusCode().value(), e.getMessage()));
+         }
       }
 
    }
