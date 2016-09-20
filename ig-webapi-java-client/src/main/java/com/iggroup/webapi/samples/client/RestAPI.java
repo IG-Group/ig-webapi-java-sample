@@ -1,5 +1,6 @@
 package com.iggroup.webapi.samples.client;
 
+import com.iggroup.webapi.samples.client.rest.*;
 import com.iggroup.webapi.samples.client.rest.dto.application.disable.updateApplicationV1.UpdateApplicationV1Response;
 import com.iggroup.webapi.samples.client.rest.dto.application.getApplicationsV1.GetApplicationsV1ResponseItem;
 import com.iggroup.webapi.samples.client.rest.dto.application.updateApplicationV1.UpdateApplicationV1Request;
@@ -73,9 +74,7 @@ import com.iggroup.webapi.samples.client.rest.dto.workingorders.otc.updateOTCWor
 import com.iggroup.webapi.samples.client.rest.dto.workingorders.otc.updateOTCWorkingOrderV1.UpdateOTCWorkingOrderV1Response;
 import com.iggroup.webapi.samples.client.rest.dto.workingorders.otc.updateOTCWorkingOrderV2.UpdateOTCWorkingOrderV2Request;
 import com.iggroup.webapi.samples.client.rest.dto.workingorders.otc.updateOTCWorkingOrderV2.UpdateOTCWorkingOrderV2Response;
-import com.iggroup.webapi.samples.client.rest.AbstractService;
-import com.iggroup.webapi.samples.client.rest.ConversationContext;
-import com.iggroup.webapi.samples.client.rest.HttpDeleteWithBody;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -88,6 +87,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Service
 public class RestAPI extends AbstractService {
+
+@Autowired
+AuthenticationService authenticationService;
+
+public AuthenticationResponseAndConversationContext createSession(CreateSessionV2Request authenticationRequest, String apiKey, boolean encrypted) {
+  return authenticationService.createSession(authenticationRequest, apiKey, encrypted);
+}
 
 /*
 Returns a deal confirmation for the given deal reference.

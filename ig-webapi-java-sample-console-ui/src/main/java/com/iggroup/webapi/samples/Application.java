@@ -134,13 +134,15 @@ public class Application implements CommandLineRunner {
    }
 
    private void connect(String identifier, String password, String apiKey) throws Exception {
-
       logStatusMessage("Connecting as " + identifier);
+
+      boolean encrypt = true;
 
       CreateSessionV2Request authRequest = new CreateSessionV2Request();
       authRequest.setIdentifier(identifier);
       authRequest.setPassword(password);
-      authenticationContext = restApi.createSession(authRequest, apiKey);
+      authRequest.setEncryptedPassword(encrypt);
+      authenticationContext = restApi.createSession(authRequest, apiKey, encrypt);
       streamingAPI.connect(authenticationContext.getCreateSessionResponse().getCurrentAccountId(), authenticationContext.getConversationContext(), authenticationContext.getCreateSessionResponse().getLightstreamerEndpoint());
    }
 
