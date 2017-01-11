@@ -1,27 +1,14 @@
 package com.iggroup.webapi.samples.client.rest;
 
 
-import com.iggroup.webapi.samples.client.rest.dto.session.createSessionV2.CreateSessionV2Response;
+import lombok.Builder;
+import lombok.Data;
 
+@Data
+@Builder
 public class AuthenticationResponseAndConversationContext {
 
 	private ConversationContext conversationContext;
-
-	private CreateSessionV2Response createSessionResponse;
-
-	public AuthenticationResponseAndConversationContext(
-			ConversationContext conversationContext,
-         CreateSessionV2Response postSessionResponse) {
-		this.conversationContext = conversationContext;
-		this.createSessionResponse = postSessionResponse;
-	}
-
-	public ConversationContext getConversationContext() {
-		return conversationContext;
-	}
-
-	public CreateSessionV2Response getCreateSessionResponse() {
-		return createSessionResponse;
-	}
-
+	private String accountId;
+	private String lightstreamerEndpoint;
 }

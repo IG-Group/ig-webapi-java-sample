@@ -69,17 +69,13 @@ public abstract class AbstractService {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-		if (conversationContext != null) {
-			if (conversationContext.getAccountSecurityToken() != null) {
-				requestHeaders.set(Constants.ACCOUNT_SSO_TOKEN_NAME,
-						conversationContext.getAccountSecurityToken());
-			}
-			if (conversationContext.getClientSecurityToken() != null) {
-				requestHeaders.set(Constants.CLIENT_SSO_TOKEN_NAME,
-						conversationContext.getClientSecurityToken());
-			}
-			requestHeaders.set(Constants.APPLICATION_KEY, conversationContext
-					.getApiKey());
+		if (conversationContext != null && conversationContext instanceof ConversationContextV2) {
+			setAuthHeaders((ConversationContextV2) conversationContext, requestHeaders);
+			requestHeaders.set(Constants.APPLICATION_KEY, conversationContext.getApiKey());
+		}
+		if (conversationContext != null && conversationContext instanceof ConversationContextV3) {
+			setAuthHeaders((ConversationContextV3) conversationContext, requestHeaders);
+			requestHeaders.set(Constants.APPLICATION_KEY, conversationContext.getApiKey());
 		}
 		if (StringUtils.isNotBlank(version)) {
 			requestHeaders.set(Constants.VERSION, version);
@@ -94,33 +90,23 @@ public abstract class AbstractService {
 		return requestEntity;
 	}
 
-	protected void bindToConversionForDeleteNoBody(
-			ConversationContext conversationContext, HttpDelete delete,
-			String version) throws Exception {
-
-		delete.addHeader(new BasicHeader("Content-Type", "application/json"));
-
-		if (StringUtils.isNotBlank(version)) {
-			delete.addHeader(Constants.VERSION, version);
+	private void setAuthHeaders(ConversationContextV2 conversationContext, HttpHeaders requestHeaders) {
+		if (conversationContext.getAccountSecurityToken() != null) {
+			requestHeaders.set(Constants.ACCOUNT_SSO_TOKEN_NAME,
+					conversationContext.getAccountSecurityToken());
 		}
+		if (conversationContext.getClientSecurityToken() != null) {
+			requestHeaders.set(Constants.CLIENT_SSO_TOKEN_NAME,
+					conversationContext.getClientSecurityToken());
+		}
+	}
 
-		if (conversationContext != null) {
-			LOG.debug("conversation context was provided");
-			if (conversationContext.getApiKey() != null) {
-				delete.addHeader(new BasicHeader(Constants.APPLICATION_KEY,
-						conversationContext.getApiKey()));
-			}
-			if (conversationContext.getAccountSecurityToken() != null) {
-				delete.addHeader(new BasicHeader(
-						Constants.ACCOUNT_SSO_TOKEN_NAME, conversationContext
-								.getAccountSecurityToken()));
-			}
-			if (StringUtils.isNotBlank(conversationContext
-					.getClientSecurityToken())) {
-				delete.addHeader(new BasicHeader(
-						Constants.CLIENT_SSO_TOKEN_NAME, conversationContext
-								.getClientSecurityToken()));
-			}
+	private void setAuthHeaders(ConversationContextV3 conversationContext, HttpHeaders requestHeaders) {
+		if (conversationContext.getAccessToken() != null) {
+			requestHeaders.set(Constants.AUTHORIZATION_HEADER, "Bearer " + conversationContext.getAccessToken());
+		}
+		if (conversationContext.getAccountId() != null) {
+			requestHeaders.set(Constants.ACCOUNT_ID_HEADER,	conversationContext.getAccountId());
 		}
 	}
 
@@ -149,16 +135,23 @@ public abstract class AbstractService {
 						Constants.APPLICATION_KEY, conversationContext
 								.getApiKey()));
 			}
-			if (conversationContext.getAccountSecurityToken() != null) {
-				deleteWithBody.addHeader(new BasicHeader(
-						Constants.ACCOUNT_SSO_TOKEN_NAME, conversationContext
-								.getAccountSecurityToken()));
+			if(conversationContext instanceof ConversationContextV2) {
+				ConversationContextV2 contextV2 = (ConversationContextV2) conversationContext;
+				if (contextV2.getAccountSecurityToken() != null) {
+					deleteWithBody.addHeader(new BasicHeader(Constants.ACCOUNT_SSO_TOKEN_NAME, contextV2.getAccountSecurityToken()));
+				}
+				if (StringUtils.isNotBlank(contextV2.getClientSecurityToken())) {
+					deleteWithBody.addHeader(new BasicHeader(Constants.CLIENT_SSO_TOKEN_NAME, contextV2.getClientSecurityToken()));
+				}
 			}
-			if (StringUtils.isNotBlank(conversationContext
-					.getClientSecurityToken())) {
-				deleteWithBody.addHeader(new BasicHeader(
-						Constants.CLIENT_SSO_TOKEN_NAME, conversationContext
-								.getClientSecurityToken()));
+			if(conversationContext instanceof ConversationContextV3) {
+				ConversationContextV3 context = (ConversationContextV3) conversationContext;
+				if (context.getAccessToken() != null) {
+					deleteWithBody.addHeader(new BasicHeader(Constants.AUTHORIZATION_HEADER, "Bearer " + context.getAccessToken()));
+				}
+				if (StringUtils.isNotBlank(context.getAccountId())) {
+					deleteWithBody.addHeader(new BasicHeader(Constants.ACCOUNT_ID_HEADER, context.getAccountId()));
+				}
 			}
 		}
 	}
@@ -167,19 +160,19 @@ public abstract class AbstractService {
 			CreateSessionV2Request authenticationRequest, String apiKey) {
 		String serviceURL = getIGApiDomainURL() + addIGApiLightDarkCluster("/session");
 
-		ConversationContext conversationContext = new ConversationContext(null,
-				null, apiKey);
+		ConversationContext conversationContext = new ConversationContextV2(null,	null, apiKey);
 		final HttpEntity httpEntity = buildHttpEntity(conversationContext,
 				authenticationRequest, "2");
 		ResponseEntity<CreateSessionV2Response> responseEntity = restTemplate
 				.exchange(serviceURL, HttpMethod.POST, httpEntity,
 						CreateSessionV2Response.class);
+		CreateSessionV2Response body = responseEntity.getBody();
 		return new AuthenticationResponseAndConversationContext(
-				new ConversationContext(responseEntity.getHeaders().getFirst(
+				new ConversationContextV2(responseEntity.getHeaders().getFirst(
 						Constants.CLIENT_SSO_TOKEN_NAME), responseEntity
 						.getHeaders()
-						.getFirst(Constants.ACCOUNT_SSO_TOKEN_NAME), apiKey),
-				responseEntity.getBody());
+						.getFirst(Constants.ACCOUNT_SSO_TOKEN_NAME), apiKey), body.getCurrentAccountId(), body.getLightstreamerEndpoint()
+				);
 	}
 
 }

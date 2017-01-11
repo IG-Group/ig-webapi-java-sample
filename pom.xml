@@ -26,6 +26,7 @@
       <jackson.version>2.8.1</jackson.version>
       <slf4j.version>1.7.21</slf4j.version>
       <httpclient.version>4.3.3</httpclient.version>
+      <lombok.version>1.16.2</lombok.version>
    </properties>
 
    <modules>
@@ -100,6 +101,12 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${httpclient.version}</version>
+         </dependency>
+
+         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
          </dependency>
 
       </dependencies>
