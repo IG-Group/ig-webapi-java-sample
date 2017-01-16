@@ -143,7 +143,6 @@ public class Application implements CommandLineRunner {
    private void disconnect() {
       unsubscribeAllLightstreamerListeners();
       streamingAPI.disconnect();
-      logStatusMessage("Disconnected");
    }
 
    private void connect(String identifier, String password, String apiKey) throws Exception {
@@ -321,7 +320,6 @@ public class Application implements CommandLineRunner {
    }
 
    private void unsubscribeAllLightstreamerListeners() {
-      logStatusMessage("Removing Lightstreamer subscriptions");
       for (HandyTableListenerAdapter listener : listeners) {
          try {
             streamingAPI.unsubscribe(listener.getSubscribedTableKey());
