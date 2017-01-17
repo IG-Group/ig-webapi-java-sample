@@ -3,7 +3,9 @@
 
 ### Overview
 This repository contains two simple Java console sample applications which access the IG REST and Streaming APIs:
+
 1) **ig-webapi-java-sample-console**: A basic console based application which logs in via /session V2, retrieves a list of position, watchlist, subscribes to lightstreamer and create a position.
+
 2) **ig-webapi-java-sample-console-ui**: A UI based console application (please increase the windows size to prevent scrolling) which shows a graph with the current market price and allows user to place a trade. Authentication is via /session V3.
 
 ### Getting started
