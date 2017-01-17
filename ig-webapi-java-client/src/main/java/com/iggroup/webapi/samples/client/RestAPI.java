@@ -50,7 +50,11 @@ import com.iggroup.webapi.samples.client.rest.dto.session.createSessionV1.Create
 import com.iggroup.webapi.samples.client.rest.dto.session.createSessionV1.CreateSessionV1Response;
 import com.iggroup.webapi.samples.client.rest.dto.session.createSessionV2.CreateSessionV2Request;
 import com.iggroup.webapi.samples.client.rest.dto.session.createSessionV2.CreateSessionV2Response;
+import com.iggroup.webapi.samples.client.rest.dto.session.createSessionV3.AccessTokenResponse;
+import com.iggroup.webapi.samples.client.rest.dto.session.createSessionV3.CreateSessionV3Request;
 import com.iggroup.webapi.samples.client.rest.dto.session.encryptionKey.getEncryptionKeySessionV1.GetEncryptionKeySessionV1Response;
+import com.iggroup.webapi.samples.client.rest.dto.session.getSessionV1.GetSessionV1Response;
+import com.iggroup.webapi.samples.client.rest.dto.session.refreshSessionV1.RefreshSessionV1Request;
 import com.iggroup.webapi.samples.client.rest.dto.session.updateActiveAccountV1.UpdateActiveAccountV1Request;
 import com.iggroup.webapi.samples.client.rest.dto.session.updateActiveAccountV1.UpdateActiveAccountV1Response;
 import com.iggroup.webapi.samples.client.rest.dto.watchlists.createWatchlistV1.CreateWatchlistV1Request;
@@ -94,6 +98,10 @@ AuthenticationService authenticationService;
 public AuthenticationResponseAndConversationContext createSession(CreateSessionV2Request authenticationRequest, String apiKey, boolean encrypted) {
   return authenticationService.createSession(authenticationRequest, apiKey, encrypted);
 }
+
+  public AuthenticationResponseAndConversationContext createSessionV3(CreateSessionV3Request authenticationRequest, String apiKey) {
+    return authenticationService.createSessionV3(authenticationRequest, apiKey);
+  }
 
 /*
 Returns a deal confirmation for the given deal reference.
@@ -739,6 +747,25 @@ public CreateSessionV2Response createSessionV2(ConversationContext conversationC
   HttpEntity<?> requestEntity = buildHttpEntity(conversationContext, request, "2");
   ResponseEntity<CreateSessionV2Response> response = restTemplate.exchange(getIGApiDomainURL() + addIGApiLightDarkCluster(uri), HttpMethod.POST, requestEntity, CreateSessionV2Response.class);
   return response.getBody();
+}
+
+/*
+Refresh an access token
+*/
+public AccessTokenResponse refreshSessionV1(ConversationContext conversationContext, RefreshSessionV1Request request) throws Exception {
+  String uri = "/session/refresh-token";
+  HttpEntity<?> requestEntity = buildHttpEntity(conversationContext, request, "1");
+  ResponseEntity<AccessTokenResponse> response = restTemplate.exchange(getIGApiDomainURL() + addIGApiLightDarkCluster(uri), HttpMethod.POST, requestEntity, AccessTokenResponse.class);
+  return response.getBody();
+}
+
+/*
+Obtains session information
+*/
+public ResponseEntity<GetSessionV1Response> getSessionV1(ConversationContext conversationContext, boolean fetchSessionTokens) throws Exception {
+  String uri = "/session?fetchSessionTokens=" + (fetchSessionTokens ? "true" : "false");
+  HttpEntity<?> requestEntity = buildHttpEntity(conversationContext, null, "1");
+  return restTemplate.exchange(getIGApiDomainURL() + addIGApiLightDarkCluster(uri), HttpMethod.GET, requestEntity, GetSessionV1Response.class);
 }
 
 /*

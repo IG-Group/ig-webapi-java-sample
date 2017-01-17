@@ -3,6 +3,8 @@ package com.iggroup.webapi.samples;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iggroup.webapi.samples.client.RestAPI;
+import com.iggroup.webapi.samples.client.StreamingAPI;
+import com.iggroup.webapi.samples.client.rest.AuthenticationResponseAndConversationContext;
 import com.iggroup.webapi.samples.client.rest.dto.markets.getMarketDetailsV2.CurrenciesItem;
 import com.iggroup.webapi.samples.client.rest.dto.markets.getMarketDetailsV2.GetMarketDetailsV2Response;
 import com.iggroup.webapi.samples.client.rest.dto.markets.getMarketDetailsV2.MarketOrderPreference;
@@ -13,15 +15,13 @@ import com.iggroup.webapi.samples.client.rest.dto.positions.otc.closeOTCPosition
 import com.iggroup.webapi.samples.client.rest.dto.positions.otc.createOTCPositionV1.CreateOTCPositionV1Request;
 import com.iggroup.webapi.samples.client.rest.dto.positions.otc.createOTCPositionV1.Direction;
 import com.iggroup.webapi.samples.client.rest.dto.positions.otc.createOTCPositionV1.OrderType;
-import com.iggroup.webapi.samples.client.rest.AuthenticationResponseAndConversationContext;
 import com.iggroup.webapi.samples.client.rest.dto.session.createSessionV2.CreateSessionV2Request;
-import com.iggroup.webapi.samples.client.streaming.HandyTableListenerAdapter;
-import com.iggroup.webapi.samples.client.StreamingAPI;
 import com.iggroup.webapi.samples.client.rest.dto.watchlists.getWatchlistByWatchlistIdV1.GetWatchlistByWatchlistIdV1Response;
 import com.iggroup.webapi.samples.client.rest.dto.watchlists.getWatchlistByWatchlistIdV1.MarketStatus;
 import com.iggroup.webapi.samples.client.rest.dto.watchlists.getWatchlistByWatchlistIdV1.MarketsItem;
 import com.iggroup.webapi.samples.client.rest.dto.watchlists.getWatchlistsV1.GetWatchlistsV1Response;
 import com.iggroup.webapi.samples.client.rest.dto.watchlists.getWatchlistsV1.WatchlistsItem;
+import com.iggroup.webapi.samples.client.streaming.HandyTableListenerAdapter;
 import com.lightstreamer.ls_client.UpdateInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +123,7 @@ public class Application implements CommandLineRunner {
       authRequest.setPassword(password);
       authRequest.setEncryptedPassword(encrypt);
       authenticationContext = restApi.createSession(authRequest, apiKey, encrypt);
-      streamingAPI.connect(authenticationContext.getCreateSessionResponse().getCurrentAccountId(), authenticationContext.getConversationContext(), authenticationContext.getCreateSessionResponse().getLightstreamerEndpoint());
+      streamingAPI.connect(authenticationContext.getAccountId(), authenticationContext.getConversationContext(), authenticationContext.getLightstreamerEndpoint());
    }
 
    private void listOpenPositions() throws Exception {
@@ -228,7 +228,7 @@ public class Application implements CommandLineRunner {
    private void subscribeToLighstreamerAccountUpdates() throws Exception {
 
       LOG.info("Subscribing to Lightstreamer account updates");
-      listeners.add(streamingAPI.subscribeForAccountBalanceInfo(authenticationContext.getCreateSessionResponse().getCurrentAccountId(), new HandyTableListenerAdapter() {
+      listeners.add(streamingAPI.subscribeForAccountBalanceInfo(authenticationContext.getAccountId(), new HandyTableListenerAdapter() {
          @Override
          public void onUpdate(int i, String s, UpdateInfo updateInfo) {
             LOG.info("Account balance info = " + updateInfo);
@@ -276,7 +276,7 @@ public class Application implements CommandLineRunner {
    private void subscribeToLighstreamerTradeUpdates() throws Exception {
 
       LOG.info("Subscribing to Lightstreamer trade updates");
-      listeners.add(streamingAPI.subscribeForOPUs(authenticationContext.getCreateSessionResponse().getCurrentAccountId(), new HandyTableListenerAdapter() {
+      listeners.add(streamingAPI.subscribeForOPUs(authenticationContext.getAccountId(), new HandyTableListenerAdapter() {
          @Override
          public void onUpdate(int i, String s, UpdateInfo updateInfo) {
             if (updateInfo.getNewValue("OPU") != null) {
@@ -285,7 +285,7 @@ public class Application implements CommandLineRunner {
             }
          }
       }));
-      listeners.add(streamingAPI.subscribeForWOUs(authenticationContext.getCreateSessionResponse().getCurrentAccountId(), new HandyTableListenerAdapter() {
+      listeners.add(streamingAPI.subscribeForWOUs(authenticationContext.getAccountId(), new HandyTableListenerAdapter() {
          @Override
          public void onUpdate(int i, String s, UpdateInfo updateInfo) {
             if (updateInfo.getNewValue("WOU") != null) {
@@ -293,7 +293,7 @@ public class Application implements CommandLineRunner {
             }
          }
       }));
-      listeners.add(streamingAPI.subscribeForConfirms(authenticationContext.getCreateSessionResponse().getCurrentAccountId(), new HandyTableListenerAdapter() {
+      listeners.add(streamingAPI.subscribeForConfirms(authenticationContext.getAccountId(), new HandyTableListenerAdapter() {
          @Override
          public void onUpdate(int i, String s, UpdateInfo updateInfo) {
             if (updateInfo.getNewValue("CONFIRMS") != null) {

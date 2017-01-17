@@ -52,6 +52,11 @@
          <artifactId>slf4j-api</artifactId>
       </dependency>
 
+      <dependency>
+         <groupId>org.projectlombok</groupId>
+         <artifactId>lombok</artifactId>
+      </dependency>
+
       <!-- lightstreamer client -->
       <dependency>
          <groupId>com.lightstreamer</groupId>

@@ -1,10 +1,13 @@
 package com.iggroup.webapi.samples.client;
 
 
-import com.iggroup.webapi.samples.client.rest.ConversationContext;
+import com.iggroup.webapi.samples.client.rest.*;
+import com.iggroup.webapi.samples.client.rest.dto.session.getSessionV1.GetSessionV1Response;
 import com.iggroup.webapi.samples.client.streaming.ConnectionListenerAdapter;
 import com.iggroup.webapi.samples.client.streaming.HandyTableListenerAdapter;
 import com.lightstreamer.ls_client.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,34 +21,53 @@ public class StreamingAPI {
 	private static final String CHART_CANDLE_PATTERN = "CHART:{epic}:{scale}";
 
 	private LSClient lsClient;
+	private final RestAPI restAPI;
 
 	private enum PasswordStrategy {
 		CLIENT("CST-"),
 		VENDOR("B2B-");
 
 		String token;
+		static RestAPI restAPI;
 
 		PasswordStrategy(String token) {
 			this.token = token;
 		}
 
-		String get(ConversationContext conversationContext) {
-			StringBuilder password = new StringBuilder();
-			if (conversationContext.getClientSecurityToken() != null
-					&& !conversationContext.getAccountSecurityToken().isEmpty()) {
-				password.append(token).append(conversationContext.getClientSecurityToken());
+		String get(ConversationContext conversationContext) throws Exception {
+			ConversationContextV2 contextV2;
+			if(conversationContext instanceof ConversationContextV3) {
+				// Fetch V2 security tokens
+				ResponseEntity<GetSessionV1Response> sessionV1Response = restAPI.getSessionV1(conversationContext, true);
+				contextV2 = new ConversationContextV2(
+						sessionV1Response.getHeaders().getFirst(Constants.CLIENT_SSO_TOKEN_NAME),
+						sessionV1Response.getHeaders().getFirst(Constants.ACCOUNT_SSO_TOKEN_NAME),
+						conversationContext.getApiKey());
+			} else {
+				contextV2 = (ConversationContextV2) conversationContext;
 			}
-			if (conversationContext.getClientSecurityToken() != null
-					&& !conversationContext.getClientSecurityToken().isEmpty()
-					&& conversationContext.getAccountSecurityToken() != null
-					&& !conversationContext.getAccountSecurityToken().isEmpty()) {
+			StringBuilder password = new StringBuilder();
+			if (contextV2.getClientSecurityToken() != null
+					&& !contextV2.getAccountSecurityToken().isEmpty()) {
+				password.append(token).append(contextV2.getClientSecurityToken());
+			}
+			if (contextV2.getClientSecurityToken() != null
+					&& !contextV2.getClientSecurityToken().isEmpty()
+					&& contextV2.getAccountSecurityToken() != null
+					&& !contextV2.getAccountSecurityToken().isEmpty()) {
 				password.append("|");
 			}
-			if (!conversationContext.getAccountSecurityToken().isEmpty()) {
-				password.append("XST-").append(conversationContext.getAccountSecurityToken());
+			if (!contextV2.getAccountSecurityToken().isEmpty()) {
+				password.append("XST-").append(contextV2.getAccountSecurityToken());
 			}
 			return password.toString();
 		}
+	}
+
+	@Autowired
+	public StreamingAPI(RestAPI restAPI) {
+		this.restAPI = restAPI;
+		PasswordStrategy.restAPI = restAPI;
 	}
 
 	public ConnectionListener connect(String username,

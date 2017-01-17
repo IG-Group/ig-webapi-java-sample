@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iggroup.webapi.samples.client.RestAPI;
 import com.iggroup.webapi.samples.client.StreamingAPI;
 import com.iggroup.webapi.samples.client.rest.AuthenticationResponseAndConversationContext;
+import com.iggroup.webapi.samples.client.rest.ConversationContextV3;
 import com.iggroup.webapi.samples.client.rest.dto.markets.getMarketDetailsV2.CurrenciesItem;
 import com.iggroup.webapi.samples.client.rest.dto.markets.getMarketDetailsV2.GetMarketDetailsV2Response;
 import com.iggroup.webapi.samples.client.rest.dto.markets.getMarketDetailsV2.MarketOrderPreference;
@@ -13,7 +14,8 @@ import com.iggroup.webapi.samples.client.rest.dto.positions.getPositionsV2.GetPo
 import com.iggroup.webapi.samples.client.rest.dto.positions.otc.createOTCPositionV1.CreateOTCPositionV1Request;
 import com.iggroup.webapi.samples.client.rest.dto.positions.otc.createOTCPositionV1.Direction;
 import com.iggroup.webapi.samples.client.rest.dto.positions.otc.createOTCPositionV1.OrderType;
-import com.iggroup.webapi.samples.client.rest.dto.session.createSessionV2.CreateSessionV2Request;
+import com.iggroup.webapi.samples.client.rest.dto.session.createSessionV3.CreateSessionV3Request;
+import com.iggroup.webapi.samples.client.rest.dto.session.refreshSessionV1.RefreshSessionV1Request;
 import com.iggroup.webapi.samples.client.rest.dto.watchlists.getWatchlistByWatchlistIdV1.GetWatchlistByWatchlistIdV1Response;
 import com.iggroup.webapi.samples.client.rest.dto.watchlists.getWatchlistByWatchlistIdV1.MarketStatus;
 import com.iggroup.webapi.samples.client.rest.dto.watchlists.getWatchlistByWatchlistIdV1.MarketsItem;
@@ -34,11 +36,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Scanner;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -92,7 +96,8 @@ public class Application implements CommandLineRunner {
    }
 
    private boolean run(final String user, final String password, final String apiKey, final String epic) {
-      try {
+      InputStreamReader reader = new InputStreamReader(System.in);
+      try(BufferedReader in = new BufferedReader(reader)) {
          AnsiConsole.systemInstall();
          System.out.println(ansi().eraseScreen());
 
@@ -110,9 +115,17 @@ public class Application implements CommandLineRunner {
          subscribeToLighstreamerTradeUpdates();
 
          logStatusMessage("Press ENTER to BUY");
+         ConversationContextV3 contextV3 = (ConversationContextV3) authenticationContext.getConversationContext();
          while(true) {
-            new Scanner(System.in).nextLine();
-            createPosition();
+            if(new Date().getTime() + 5000 > contextV3.getAccessTokenExpiry()) {    // Refresh the access token 5 seconds before expiry
+               logStatusMessage("Refreshing access token");
+               contextV3 = refreshAccessToken(contextV3);
+            }
+            Thread.sleep(20);
+            if (in.ready()) {
+               in.readLine();
+               createPosition();
+            }
          }
       } catch (Exception e) {
          logStatusMessage("Failure: " + e.getMessage());
@@ -130,20 +143,23 @@ public class Application implements CommandLineRunner {
    private void disconnect() {
       unsubscribeAllLightstreamerListeners();
       streamingAPI.disconnect();
-      logStatusMessage("Disconnected");
    }
 
    private void connect(String identifier, String password, String apiKey) throws Exception {
       logStatusMessage("Connecting as " + identifier);
 
-      boolean encrypt = true;
-
-      CreateSessionV2Request authRequest = new CreateSessionV2Request();
+      CreateSessionV3Request authRequest = new CreateSessionV3Request();
       authRequest.setIdentifier(identifier);
       authRequest.setPassword(password);
-      authRequest.setEncryptedPassword(encrypt);
-      authenticationContext = restApi.createSession(authRequest, apiKey, encrypt);
-      streamingAPI.connect(authenticationContext.getCreateSessionResponse().getCurrentAccountId(), authenticationContext.getConversationContext(), authenticationContext.getCreateSessionResponse().getLightstreamerEndpoint());
+      authenticationContext = restApi.createSessionV3(authRequest, apiKey);
+      streamingAPI.connect(authenticationContext.getAccountId(), authenticationContext.getConversationContext(), authenticationContext.getLightstreamerEndpoint());
+   }
+
+   private ConversationContextV3 refreshAccessToken(final ConversationContextV3 contextV3) throws Exception {
+      logStatusMessage("Refreshing access token");
+      ConversationContextV3 newContextV3 = new ConversationContextV3(restApi.refreshSessionV1(contextV3, RefreshSessionV1Request.builder().refresh_token(contextV3.getRefreshToken()).build()), contextV3.getAccountId(), contextV3.getApiKey());
+      authenticationContext.setConversationContext(newContextV3);
+      return newContextV3;
    }
 
    private int getOpenPositionCount() {
@@ -235,7 +251,7 @@ public class Application implements CommandLineRunner {
    private void subscribeToLighstreamerAccountUpdates() throws Exception {
 
       logStatusMessage("Subscribing to Lightstreamer account updates");
-      listeners.add(streamingAPI.subscribeForAccountBalanceInfo(authenticationContext.getCreateSessionResponse().getCurrentAccountId(), new HandyTableListenerAdapter() {
+      listeners.add(streamingAPI.subscribeForAccountBalanceInfo(authenticationContext.getAccountId(), new HandyTableListenerAdapter() {
          @Override
          public void onUpdate(int i, String s, UpdateInfo updateInfo) {
             double profitAndLoss = Double.valueOf(updateInfo.getNewValue("PNL"));
@@ -281,13 +297,13 @@ public class Application implements CommandLineRunner {
 
    private void subscribeToLighstreamerTradeUpdates() throws Exception {
       logStatusMessage("Subscribing to Lightstreamer trade updates");
-      listeners.add(streamingAPI.subscribeForOPUs(authenticationContext.getCreateSessionResponse().getCurrentAccountId(), new HandyTableListenerAdapter() {
+      listeners.add(streamingAPI.subscribeForOPUs(authenticationContext.getAccountId(), new HandyTableListenerAdapter() {
          @Override
          public void onUpdate(int i, String s, UpdateInfo updateInfo) {
             logMessage(1, 4, "Open positions: " + getOpenPositionCount());
          }
       }));
-      listeners.add(streamingAPI.subscribeForConfirms(authenticationContext.getCreateSessionResponse().getCurrentAccountId(), new HandyTableListenerAdapter() {
+      listeners.add(streamingAPI.subscribeForConfirms(authenticationContext.getAccountId(), new HandyTableListenerAdapter() {
          @Override
          public void onUpdate(int i, String s, UpdateInfo updateInfo) {
             if (updateInfo.getNewValue("CONFIRMS") != null) {
@@ -304,7 +320,6 @@ public class Application implements CommandLineRunner {
    }
 
    private void unsubscribeAllLightstreamerListeners() {
-      logStatusMessage("Removing Lightstreamer subscriptions");
       for (HandyTableListenerAdapter listener : listeners) {
          try {
             streamingAPI.unsubscribe(listener.getSubscribedTableKey());
