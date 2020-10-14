@@ -47,6 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Application implements CommandLineRunner {
 
    private static final Logger LOG = LoggerFactory.getLogger(Application.class);
+   private static final String CONFIRMS = "CONFIRMS";
 
    @Autowired
    protected ObjectMapper objectMapper;
@@ -296,7 +297,7 @@ public class Application implements CommandLineRunner {
       listeners.add(streamingAPI.subscribeForConfirms(authenticationContext.getAccountId(), new HandyTableListenerAdapter() {
          @Override
          public void onUpdate(int i, String s, UpdateInfo updateInfo) {
-            if (updateInfo.getNewValue("CONFIRMS") != null) {
+            if (shouldClosePositionForConfirm(updateInfo)) {
                LOG.info("Trade confirm update i {} s {} data {}", i, s, updateInfo);
                receivedConfirm.set(true);
                closePositionIfCreated(updateInfo);
@@ -310,5 +311,9 @@ public class Application implements CommandLineRunner {
       for (HandyTableListenerAdapter listener : listeners) {
          streamingAPI.unsubscribe(listener.getSubscribedTableKey());
       }
+   }
+   
+   private boolean shouldClosePositionForConfirm(UpdateInfo updateInfo) {
+      return updateInfo.getNewValue(CONFIRMS) != null && updateInfo.isValueChanged(CONFIRMS);
    }
 }
