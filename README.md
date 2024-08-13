@@ -1,3 +1,9 @@
+🚧 Notice
+
+Date: 2024 August
+
+This repository is now deprecated and may be removed/replaced at a later date.
+
 ## IG Web API Java Sample
 [![Build Status](https://travis-ci.org/IG-Group/ig-webapi-java-sample.svg?branch=master)](https://travis-ci.org/IG-Group/ig-webapi-java-sample)
 
